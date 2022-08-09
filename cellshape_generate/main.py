@@ -70,7 +70,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--num_epochs_autoencoder",
-        default=1,
+        default=250,
         type=int,
         help="Provide the number of epochs for the autoencoder training.",
     )
