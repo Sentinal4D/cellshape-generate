@@ -100,7 +100,6 @@ class FoldNetEncoder(nn.Module):
             nn.Conv1d(512, 512, 1),
         )
 
-
     def graph_layer(self, x, idx):
         x = local_maxpool(x, idx)
         x = self.linear1(x)

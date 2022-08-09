@@ -31,16 +31,18 @@ class SpiralConv(nn.Module):
             x = x.view(bs, n_nodes, -1)
         else:
             raise RuntimeError(
-                'x.dim() is expected to be 2 or 3, but received {}'.format(
-                    x.dim()))
+                "x.dim() is expected to be 2 or 3, but received {}".format(x.dim())
+            )
         x = self.layer(x)
         return x
 
     def __repr__(self):
-        return '{}({}, {}, seq_length={})'.format(self.__class__.__name__,
-                                                  self.in_channels,
-                                                  self.out_channels,
-                                                  self.seq_length)
+        return "{}({}, {}, seq_length={})".format(
+            self.__class__.__name__,
+            self.in_channels,
+            self.out_channels,
+            self.seq_length,
+        )
 
 
 def Pool(x, trans, dim=1):
@@ -82,8 +84,15 @@ class SpiralDeblock(nn.Module):
 
 
 class SpiralVAE(nn.Module):
-    def __init__(self, in_channels, out_channels, latent_channels,
-                 spiral_indices, down_transform, up_transform):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        latent_channels,
+        spiral_indices,
+        down_transform,
+        up_transform,
+    ):
         super(SpiralVAE, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -99,37 +108,53 @@ class SpiralVAE(nn.Module):
         for idx in range(len(out_channels)):
             if idx == 0:
                 self.en_layers.append(
-                    SpiralEnblock(in_channels, out_channels[idx],
-                                  self.spiral_indices[idx]))
+                    SpiralEnblock(
+                        in_channels, out_channels[idx], self.spiral_indices[idx]
+                    )
+                )
             else:
                 self.en_layers.append(
-                    SpiralEnblock(out_channels[idx - 1], out_channels[idx],
-                                  self.spiral_indices[idx]))
+                    SpiralEnblock(
+                        out_channels[idx - 1],
+                        out_channels[idx],
+                        self.spiral_indices[idx],
+                    )
+                )
         self.en_layers.append(
-            nn.Linear(self.num_vert * out_channels[-1], latent_channels))
+            nn.Linear(self.num_vert * out_channels[-1], latent_channels)
+        )
 
         # decoder
         self.de_layers = nn.ModuleList()
         self.de_layers.append(
-            nn.Linear(latent_channels, self.num_vert * out_channels[-1]))
+            nn.Linear(latent_channels, self.num_vert * out_channels[-1])
+        )
         for idx in range(len(out_channels)):
             if idx == 0:
                 self.de_layers.append(
-                    SpiralDeblock(out_channels[-idx - 1],
-                                  out_channels[-idx - 1],
-                                  self.spiral_indices[-idx - 1]))
+                    SpiralDeblock(
+                        out_channels[-idx - 1],
+                        out_channels[-idx - 1],
+                        self.spiral_indices[-idx - 1],
+                    )
+                )
             else:
                 self.de_layers.append(
-                    SpiralDeblock(out_channels[-idx], out_channels[-idx - 1],
-                                  self.spiral_indices[-idx - 1]))
+                    SpiralDeblock(
+                        out_channels[-idx],
+                        out_channels[-idx - 1],
+                        self.spiral_indices[-idx - 1],
+                    )
+                )
         self.de_layers.append(
-            SpiralConv(out_channels[0], in_channels, self.spiral_indices[0]))
+            SpiralConv(out_channels[0], in_channels, self.spiral_indices[0])
+        )
 
         self.reset_parameters()
 
     def reset_parameters(self):
         for name, param in self.named_parameters():
-            if 'bias' in name:
+            if "bias" in name:
                 nn.init.constant_(param, 0)
             else:
                 nn.init.xavier_uniform_(param)
@@ -160,4 +185,3 @@ class SpiralVAE(nn.Module):
         z = self.encoder(x)
         out = self.decoder(z)
         return out
-

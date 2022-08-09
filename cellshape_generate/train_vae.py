@@ -3,12 +3,12 @@ from torch.utils.data import DataLoader
 from datetime import datetime
 import logging
 
-
-from cellshape_cloud.vendor.chamfer_distance import ChamferLoss
 from cellshape_cloud.pointcloud_dataset import PointCloudDataset, SingleCellDataset
 from cloud_vae import CloudVAE
 from cellshape_cloud.helpers.reports import get_experiment_name
 from training_functions import train
+
+from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
 
 
 def train_vae(args):
@@ -44,9 +44,7 @@ def train_vae(args):
         autoencoder.load_state_dict(checkpoint["model_state_dict"])
         print(f"The loss of the loaded model is {checkpoint['loss']}")
     except RuntimeError:
-        print(
-            "The model architecture given doesn't " "match the one provided."
-        )
+        print("The model architecture given doesn't " "match the one provided.")
         print("Training from scratch")
         wrong_architecture = True
         everything_working = False
@@ -56,10 +54,12 @@ def train_vae(args):
         print("Training from scratch")
 
     try:
-        model_dict = autoencoder.state_dict()  # load parameters from pre-trained FoldingNet
-        for k in checkpoint['model_state_dict']:
+        model_dict = (
+            autoencoder.state_dict()
+        )  # load parameters from pre-trained FoldingNet
+        for k in checkpoint["model_state_dict"]:
             if k in model_dict:
-                model_dict[k] = checkpoint['model_state_dict'][k]
+                model_dict[k] = checkpoint["model_state_dict"][k]
                 print("Found weight: " + k)
 
         autoencoder.load_state_dict(model_dict)
@@ -68,15 +68,13 @@ def train_vae(args):
         print(e)
         print("Tried loading some weights from a pre-trained autoencoder. Did not work")
     if args.dataset_type == "SingleCell":
-        dataset = SingleCellDataset(
-            args.dataframe_path, args.cloud_dataset_path
-        )
+        dataset = SingleCellDataset(args.dataframe_path, args.cloud_dataset_path)
     else:
         dataset = PointCloudDataset(args.cloud_dataset_path)
 
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
-    reconstruction_criterion = ChamferLoss()
+    reconstruction_criterion = chamfer_3DDist()
 
     optimizer = torch.optim.Adam(
         autoencoder.parameters(),
@@ -84,9 +82,7 @@ def train_vae(args):
         betas=(0.9, 0.999),
         weight_decay=1e-6,
     )
-    logging_info = get_experiment_name(
-        model=autoencoder, output_dir=args.output_dir
-    )
+    logging_info = get_experiment_name(model=autoencoder, output_dir=args.output_dir)
     name_logging, name_model, name_writer, name = logging_info
     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     logging.basicConfig(filename=name_logging, level=logging.INFO)
@@ -144,7 +140,7 @@ def train_vae(args):
         optimizer=optimizer,
         logging_info=logging_info,
         kld_weight=args.kld_weight,
-        beta=args.beta
+        beta=args.beta,
     )
     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     logging.info(f"Finished training at {now}.")

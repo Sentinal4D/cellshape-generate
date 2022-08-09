@@ -9,11 +9,13 @@ from cellshape_cloud.vendor.decoders import FoldNetDecoder, FoldingNetBasicDecod
 def reparametrize(mu, logvar):
     std = logvar.div(2).exp()
     eps = std.data.new(std.size()).normal_()
-    return mu + std*eps
+    return mu + std * eps
 
 
 class CloudVAE(nn.Module):
-    def __init__(self, num_features, k=20, encoder_type="dgcnn", decoder_type="foldingnet"):
+    def __init__(
+        self, num_features, k=20, encoder_type="dgcnn", decoder_type="foldingnet"
+    ):
         super(CloudVAE, self).__init__()
         self.k = k
         self.num_features = num_features
@@ -32,28 +34,20 @@ class CloudVAE(nn.Module):
         self.decoder_type = decoder_type.lower()
 
         if self.encoder_type == "dgcnn":
-            self.encoder = DGCNNEncoder(
-                num_features=self.num_features, k=self.k
-            )
+            self.encoder = DGCNNEncoder(num_features=self.num_features, k=self.k)
         else:
-            self.encoder = FoldNetEncoder(
-                num_features=self.num_features, k=self.k
-            )
+            self.encoder = FoldNetEncoder(num_features=self.num_features, k=self.k)
 
         if self.decoder_type == "foldingnet":
             self.decoder = FoldNetDecoder(num_features=self.num_features)
         else:
-            self.decoder = FoldingNetBasicDecoder(
-                num_features=self.num_features
-            )
+            self.decoder = FoldingNetBasicDecoder(num_features=self.num_features)
         self.lin_features_len = 512
         if (self.num_features < self.lin_features_len) or (
             self.num_features > self.lin_features_len
         ):
             self.flatten = Flatten()
-            self.fc_mu = nn.Linear(
-                self.lin_features_len, self.num_features, bias=False
-            )
+            self.fc_mu = nn.Linear(self.lin_features_len, self.num_features, bias=False)
             self.fc_var = nn.Linear(
                 self.lin_features_len, self.num_features, bias=False
             )

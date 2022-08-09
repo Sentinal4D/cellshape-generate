@@ -39,8 +39,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--cloud_dataset_path",
-        default="/home/mvries/Documents/Datasets/"
-                "OPM/SingleCellFromNathan_17122021/",
+        default="/home/mvries/Documents/Datasets/" "OPM/SingleCellFromNathan_17122021/",
         type=str,
         help="Please provide the path to the " "dataset of the point clouds.",
     )
@@ -56,8 +55,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataframe_path",
         default="/home/mvries/Documents/Datasets/"
-                "OPM/SingleCellFromNathan_17122021"
-                "/all_data_removedwrong_ori_removedTwo.csv",
+        "OPM/SingleCellFromNathan_17122021"
+        "/all_data_removedwrong_ori_removedTwo.csv",
         type=str,
         help="Please provide the path to the dataframe "
         "containing information on the dataset.",
@@ -99,8 +98,7 @@ if __name__ == "__main__":
         "--learning_rate_autoencoder",
         default=0.0001,
         type=float,
-        help="Please provide the learning rate "
-        "for the autoencoder training.",
+        help="Please provide the learning rate " "for the autoencoder training.",
     )
     parser.add_argument(
         "--batch_size",
@@ -127,14 +125,14 @@ if __name__ == "__main__":
         default=4,
         type=int,
         help="Please provide a value for beta for the beta-vae"
-             ". See https://openreview.net/forum?id=Sy2fzU9gl.",
+        ". See https://openreview.net/forum?id=Sy2fzU9gl.",
     )
     parser.add_argument(
         "--kld_weight",
         default=1,
         type=int,
         help="Please provide a value for Kullback_liebler convergence weight"
-             ". See https://openreview.net/forum?id=Sy2fzU9gl.",
+        ". See https://openreview.net/forum?id=Sy2fzU9gl.",
     )
     parser.add_argument(
         "--seed",

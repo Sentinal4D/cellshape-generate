@@ -7,7 +7,9 @@ from cellshape_cloud.helpers.reports import print_log
 from losses import beta_loss
 
 
-def train(model, dataloader, num_epochs, criterion, optimizer, logging_info, kld_weight, beta):
+def train(
+    model, dataloader, num_epochs, criterion, optimizer, logging_info, kld_weight, beta
+):
 
     name_logging, name_model, name_writer, name = logging_info
 
@@ -34,30 +36,34 @@ def train(model, dataloader, num_epochs, criterion, optimizer, logging_info, kld
                 with torch.set_grad_enabled(True):
                     output, mu, log_var, z, feats = model(inputs)
                     optimizer.zero_grad()
-                    loss = beta_loss(inputs,
-                                     output,
-                                     mu,
-                                     log_var,
-                                     kld_weight,
-                                     criterion,
-                                     beta)
+                    loss, recon_loss, kld_loss = beta_loss(
+                        inputs, output, mu, log_var, kld_weight, criterion, beta
+                    )
 
                     # ===================backward====================
                     loss.backward()
                     optimizer.step()
 
                 batch_loss = loss.detach().item() / batch_size
+                batch_loss_recon = recon_loss.detach().item() / batch_size
+                batch_loss_kld = kld_loss.detach().item() / batch_size
                 running_loss += batch_loss
                 batch_num += 1
-                writer.add_scalar("/Loss", batch_loss, niter)
+                writer.add_scalar("/TotalLoss", batch_loss, niter)
+                writer.add_scalar("/ReconLoss", batch_loss, niter)
+                writer.add_scalar("/KLDLoss", batch_loss, niter)
                 niter += 1
-                tepoch.set_postfix(loss=batch_loss)
+                tepoch.set_postfix(
+                    loss=batch_loss,
+                    recon_loss=batch_loss_recon,
+                    kld_loss=batch_loss_kld,
+                )
 
                 if batch_num % 10 == 0:
                     logging.info(
                         f"[{epoch}/{num_epochs}]"
                         f"[{batch_num}/{len(dataloader)}]"
-                        f"LossTot: {batch_loss}"
+                        f"Total loss (recon + kld): {batch_loss} ({batch_loss_recon} + {batch_loss_kld})"
                     )
 
             total_loss = running_loss / len(dataloader)
@@ -70,9 +76,7 @@ def train(model, dataloader, num_epochs, criterion, optimizer, logging_info, kld
                 }
                 best_loss = total_loss
                 torch.save(checkpoint, name_model)
-                logging.info(
-                    f"Saving model to {name_model} with loss = {best_loss}."
-                )
+                logging.info(f"Saving model to {name_model} with loss = {best_loss}.")
                 print(f"Saving model to {name_model} with loss = {best_loss}.")
 
         logging.info(f"Finished epoch {epoch} with loss={best_loss}.")
