@@ -7,8 +7,12 @@ from cellshape_cloud.pointcloud_dataset import PointCloudDataset, SingleCellData
 from cloud_vae import CloudVAE
 from cellshape_cloud.helpers.reports import get_experiment_name
 from training_functions import train
+from cellshape_cloud.vendor.chamfer_distance import ChamferLoss
 
-from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
+try:
+    from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
+except:
+    print("Cannot use cuda chamfer dist as is not installed properly.")
 
 
 def train_vae(args):
@@ -74,7 +78,10 @@ def train_vae(args):
 
     dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
-    reconstruction_criterion = chamfer_3DDist()
+    if args.criterion == "cuda":
+        reconstruction_criterion = chamfer_3DDist()
+    else:
+        reconstruction_criterion = ChamferLoss()
 
     optimizer = torch.optim.Adam(
         autoencoder.parameters(),

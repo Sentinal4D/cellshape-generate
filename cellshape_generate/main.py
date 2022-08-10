@@ -75,7 +75,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--num_features",
-        default=128,
+        default=16,
         type=int,
         help="Please provide the number of " "features to extract.",
     )
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--learning_rate_autoencoder",
-        default=0.0001,
+        default=0.00001,
         type=float,
         help="Please provide the learning rate " "for the autoencoder training.",
     )
@@ -115,7 +115,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--pretrained_path",
-        default=None,
+        default="/run/user/1128299809/gvfs/smb-share:server=rds.icr.ac.uk,share=data/DBI/" \
+         "DUDBI/DYNCESYS/mvries/ResultsAlma/cellshape-generate/nets/" \
+         "dgcnn_foldingnetbasic_16_pretrained_001.pt",
         type=str,
         help="Please provide the path to a pretrained autoencoder.",
     )
@@ -139,6 +141,12 @@ if __name__ == "__main__":
         default=1,
         type=int,
         help="Random seed.",
+    )
+    parser.add_argument(
+        "--criterion",
+        default="cuda",
+        type=str,
+        choices=["cpu", "cuda"]
     )
     args = parser.parse_args()
     output = train_vae(args)

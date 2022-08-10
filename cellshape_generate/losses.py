@@ -1,6 +1,7 @@
 import torch
 from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
 
+
 chamfer_dist = chamfer_3DDist()
 
 

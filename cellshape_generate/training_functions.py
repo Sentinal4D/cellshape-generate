@@ -5,12 +5,13 @@ from torch.utils.tensorboard import SummaryWriter
 
 from cellshape_cloud.helpers.reports import print_log
 from losses import beta_loss
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
 def train(
     model, dataloader, num_epochs, criterion, optimizer, logging_info, kld_weight, beta
 ):
-
+    scheduler = ReduceLROnPlateau(optimizer, 'min')
     name_logging, name_model, name_writer, name = logging_info
 
     writer = SummaryWriter(log_dir=name_writer)
@@ -78,7 +79,7 @@ def train(
                 torch.save(checkpoint, name_model)
                 logging.info(f"Saving model to {name_model} with loss = {best_loss}.")
                 print(f"Saving model to {name_model} with loss = {best_loss}.")
-
+        scheduler.step(running_loss)
         logging.info(f"Finished epoch {epoch} with loss={best_loss}.")
         print(f"Finished epoch {epoch} with loss={best_loss}.")
     print_log(f"Finished training {num_epochs} epochs.")

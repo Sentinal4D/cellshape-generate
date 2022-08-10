@@ -1,3 +1,6 @@
+"""
+Adapted from https://github.com/chenchao15/drwr/blob/main/drwr/render/render_point_cloud.py
+"""
 import os
 import tempfile
 import subprocess
