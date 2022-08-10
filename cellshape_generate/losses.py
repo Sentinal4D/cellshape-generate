@@ -1,6 +1,8 @@
 import torch
-from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
-
+try:
+    from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
+except:
+    print("Chamfer3D not installed, using original chamfer distance")
 
 chamfer_dist = chamfer_3DDist()
 
