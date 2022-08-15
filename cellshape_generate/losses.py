@@ -1,16 +1,16 @@
 import torch
 try:
     from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
+    chamfer_dist = chamfer_3DDist()
 except:
     print("Chamfer3D not installed, using original chamfer distance")
 
-chamfer_dist = chamfer_3DDist()
-
 
 def beta_loss(inputs, outputs, mu, log_var, kld_weight, criterion, beta):
-    if isinstance(criterion, chamfer_3DDist):
-        recon_loss = chamfer(inputs, outputs)
-    else:
+    try:
+        if isinstance(criterion, chamfer_3DDist):
+            recon_loss = chamfer(inputs, outputs)
+    except:
         recon_loss = criterion(inputs, outputs)
 
     kld_loss = torch.mean(
