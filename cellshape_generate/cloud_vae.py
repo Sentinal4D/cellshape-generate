@@ -3,7 +3,7 @@ from torch import nn
 
 from cellshape_cloud.helpers.helper_modules import Flatten
 from vendor.encoders import FoldNetEncoder, DGCNNEncoder
-from cellshape_cloud.vendor.decoders import FoldNetDecoder, FoldingNetBasicDecoder
+from vendor.decoders import FoldNetDecoder
 
 
 def reparametrize(mu, logvar):
@@ -14,11 +14,13 @@ def reparametrize(mu, logvar):
 
 class CloudVAE(nn.Module):
     def __init__(
-        self, num_features, k=20, encoder_type="dgcnn", decoder_type="foldingnet"
+        self, num_features=512, k=20, encoder_type="dgcnn", decoder_type="foldingnet",
+            num_features_ae=512
     ):
         super(CloudVAE, self).__init__()
         self.k = k
         self.num_features = num_features
+        self.num_features_ae = num_features_ae
 
         assert encoder_type.lower() in [
             "foldingnet",
@@ -40,17 +42,16 @@ class CloudVAE(nn.Module):
 
         if self.decoder_type == "foldingnet":
             self.decoder = FoldNetDecoder(num_features=self.num_features)
-        else:
-            self.decoder = FoldingNetBasicDecoder(num_features=self.num_features)
-        self.lin_features_len = 512
-        if (self.num_features < self.lin_features_len) or (
-            self.num_features > self.lin_features_len
+
+        if (self.num_features_ae < self.num_features) or (
+            self.num_features_ae > self.num_features
         ):
             self.flatten = Flatten()
-            self.fc_mu = nn.Linear(self.lin_features_len, self.num_features, bias=False)
+            self.fc_mu = nn.Linear(self.num_features, self.num_features_ae, bias=False)
             self.fc_var = nn.Linear(
-                self.lin_features_len, self.num_features, bias=False
+                self.num_features, self.num_features_ae, bias=False
             )
+            self.deembedding = nn.Linear(self.num_features_ae, self.num_features)
 
     def forward(self, x):
 
@@ -62,24 +63,31 @@ class CloudVAE(nn.Module):
     def _encode(self, x):
         batch_size = x.size(0)
         feats = self.encoder(x)
-        if (self.num_features < self.lin_features_len) or (
-            self.num_features > self.lin_features_len
+        if (self.num_features_ae < self.num_features) or (
+            self.num_features_ae > self.num_features
         ):
             x = self.flatten(feats)
             mu = self.fc_mu(x)
             log_var = self.fc_var(x)
         else:
-            mu = torch.reshape(torch.squeeze(feats), (batch_size, 512))
-            log_var = torch.reshape(torch.squeeze(feats), (batch_size, 512))
+            mu = torch.reshape(torch.squeeze(feats), (batch_size, self.num_features))
+            log_var = torch.reshape(torch.squeeze(feats), (batch_size, self.num_features))
 
         return mu, log_var, feats
 
     def _decode(self, z):
-        return self.decoder(z)
+        if (self.num_features_ae < self.num_features) or (
+            self.num_features_ae > self.num_features
+        ):
+            z = self.deembedding(z)
+
+        z = z.unsqueeze(1)
+        output = self.decoder(z)
+        return output
 
 
 if __name__ == "__main__":
-    model = CloudVAE(num_features=128)
+    model = CloudVAE(num_features_ae=128)
     inp = torch.rand((2, 2048, 3))
     out = model(inp)
     print(out[0].shape)

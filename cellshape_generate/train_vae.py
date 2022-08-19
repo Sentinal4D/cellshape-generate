@@ -25,52 +25,67 @@ def train_vae(args):
     everything_working = True
     file_not_found = False
     wrong_architecture = False
-    try:
-        checkpoint = torch.load(args.pretrained_path)
-    except FileNotFoundError:
-        print(
-            "This model doesn't exist."
-            " Please check the provided path and try again. "
-            "Ignore this message if you do not have a pretrained model."
-        )
-        checkpoint = {"model_state_dict": None}
-        file_not_found = True
-        everything_working = False
-    except AttributeError:
-        print("No pretrained model given.")
-        checkpoint = {"model_state_dict": None}
-        everything_working = False
-    except:
-        print("No pretrained model given.")
-        checkpoint = {"model_state_dict": None}
-        everything_working = False
-    try:
-        autoencoder.load_state_dict(checkpoint["model_state_dict"])
-        print(f"The loss of the loaded model is {checkpoint['loss']}")
-    except RuntimeError:
-        print("The model architecture given doesn't " "match the one provided.")
-        print("Training from scratch")
-        wrong_architecture = True
-        everything_working = False
-    except AttributeError or TypeError:
-        print("Training from scratch")
-    except:
-        print("Training from scratch")
-
-    try:
-        model_dict = (
-            autoencoder.state_dict()
-        )  # load parameters from pre-trained FoldingNet
-        for k in checkpoint["model_state_dict"]:
+    if "shapenetcorev2_250" in args.pretrained_path:
+        checkpoint = torch.load(args.pretrained_path, map_location="cuda")
+            # model.load_state_dict(checkpoint['model_state_dict'])
+        model_dict = autoencoder.state_dict()  # load parameters from pre-trained FoldingNet
+        for k in checkpoint:
             if k in model_dict:
-                model_dict[k] = checkpoint["model_state_dict"][k]
-                print("Found weight: " + k)
-
+                model_dict[k] = checkpoint[k]
+                print("    Found weight: " + k)
+            elif k.replace('folding1', 'folding') in model_dict:
+                model_dict[k.replace('folding1', 'folding')] = checkpoint['model_state_dict'][k]
+                print("    Found weight: " + k)
         autoencoder.load_state_dict(model_dict)
 
-    except Exception as e:
-        print(e)
-        print("Tried loading some weights from a pre-trained autoencoder. Did not work")
+    else:
+        try:
+            checkpoint = torch.load(args.pretrained_path)
+        except FileNotFoundError:
+            print(
+                "This model doesn't exist."
+                " Please check the provided path and try again. "
+                "Ignore this message if you do not have a pretrained model."
+            )
+            checkpoint = {"model_state_dict": None}
+            file_not_found = True
+            everything_working = False
+        except AttributeError:
+            print("No pretrained model given.")
+            checkpoint = {"model_state_dict": None}
+            everything_working = False
+        except:
+            print("No pretrained model given.")
+            checkpoint = {"model_state_dict": None}
+            everything_working = False
+        try:
+            autoencoder.load_state_dict(checkpoint["model_state_dict"])
+            print(f"The loss of the loaded model is {checkpoint['loss']}")
+        except RuntimeError:
+            print("The model architecture given doesn't " "match the one provided.")
+            print("Training from scratch")
+            wrong_architecture = True
+            everything_working = False
+        except AttributeError or TypeError:
+            print("Training from scratch")
+        except:
+            print("Training from scratch")
+
+        try:
+            model_dict = (
+                autoencoder.state_dict()
+            )  # load parameters from pre-trained FoldingNet
+            for k in checkpoint["model_state_dict"]:
+                if k in model_dict:
+                    model_dict[k] = checkpoint["model_state_dict"][k]
+                    print("Found weight: " + k)
+
+            autoencoder.load_state_dict(model_dict)
+
+        except Exception as e:
+            print(e)
+            print("Tried loading some weights from a pre-trained autoencoder. Did not work")
+
     if args.dataset_type == "SingleCell":
         dataset = SingleCellDataset(args.dataframe_path, args.cloud_dataset_path)
     else:

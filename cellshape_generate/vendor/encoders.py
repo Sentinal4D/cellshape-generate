@@ -24,27 +24,36 @@ class DGCNNEncoder(nn.Module):
         super(DGCNNEncoder, self).__init__()
         self.k = k
         self.num_features = num_features
+        self.bn1 = nn.BatchNorm2d(64)
+        self.bn2 = nn.BatchNorm2d(64)
+        self.bn3 = nn.BatchNorm2d(128)
+        self.bn4 = nn.BatchNorm2d(256)
+        self.bn5 = nn.BatchNorm1d(self.num_features)
 
         self.conv1 = nn.Sequential(
             nn.Conv2d(3 * 2, 64, kernel_size=1, bias=False),
-            nn.BatchNorm2d(64),
+            self.bn1,
             nn.LeakyReLU(negative_slope=0.2),
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(64 * 2, 64, kernel_size=1, bias=False),
-            nn.BatchNorm2d(64),
+            self.bn2,
             nn.LeakyReLU(negative_slope=0.2),
         )
         self.conv3 = nn.Sequential(
             nn.Conv2d(64 * 2, 128, kernel_size=1, bias=False),
-            nn.BatchNorm2d(128),
+            self.bn3,
             nn.LeakyReLU(negative_slope=0.2),
         )
         self.conv4 = nn.Sequential(
             nn.Conv2d(128 * 2, 256, kernel_size=1, bias=False),
-            nn.BatchNorm2d(256),
+            self.bn4,
             nn.LeakyReLU(negative_slope=0.2),
         )
+        self.conv5 = nn.Sequential(
+            nn.Conv1d(512, self.num_features, kernel_size=1, bias=False),
+            self.bn5,
+            nn.LeakyReLU(negative_slope=0.2))
 
     def forward(self, x):
         x = x.transpose(2, 1)
@@ -67,6 +76,7 @@ class DGCNNEncoder(nn.Module):
 
         x = torch.cat((x1, x2, x3, x4), dim=1)
 
+        x = self.conv5(x)
         x = x.max(dim=-1, keepdim=False)[0]
         feat = x.unsqueeze(1)
 

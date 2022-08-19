@@ -10,6 +10,8 @@ def beta_loss(inputs, outputs, mu, log_var, kld_weight, criterion, beta):
     try:
         if isinstance(criterion, chamfer_3DDist):
             recon_loss = chamfer(inputs, outputs)
+        else:
+            recon_loss = criterion(inputs, outputs)
     except:
         recon_loss = criterion(inputs, outputs)
 

@@ -26,14 +26,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--tif_dataset_path",
         default="/home/mvries/Documents/CellShape/"
-        "UploadData/Dataset/TestConvert/TestTiff/",
+                "UploadData/Dataset/TestConvert/TestTiff/",
         type=str,
         help="Please provide the path to the " "dataset of 3D tif images",
     )
     parser.add_argument(
         "--mesh_dataset_path",
         default="/home/mvries/Documents/CellShape/"
-        "UploadData/Dataset/TestConvert/TestMesh/",
+                "UploadData/Dataset/TestConvert/TestMesh/",
         type=str,
         help="Please provide the path to the " "dataset of 3D meshes.",
     )
@@ -49,17 +49,17 @@ if __name__ == "__main__":
         type=str,
         choices=["SingleCell", "Other"],
         help="Please provide the type of dataset. "
-        "If using the one from our paper, then choose 'SingleCell', "
-        "otherwise, choose 'Other'.",
+             "If using the one from our paper, then choose 'SingleCell', "
+             "otherwise, choose 'Other'.",
     )
     parser.add_argument(
         "--dataframe_path",
         default="/home/mvries/Documents/Datasets/"
-        "OPM/SingleCellFromNathan_17122021"
-        "/all_data_removedwrong_ori_removedTwo.csv",
+                "OPM/SingleCellFromNathan_17122021"
+                "/all_data_removedwrong_ori_removedTwo.csv",
         type=str,
         help="Please provide the path to the dataframe "
-        "containing information on the dataset.",
+             "containing information on the dataset.",
     )
     parser.add_argument(
         "--output_dir",
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--num_features",
-        default=16,
+        default=512,
         type=int,
         help="Please provide the number of " "features to extract.",
     )
@@ -90,13 +90,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--decoder_type",
-        default="foldingnetbasic",
+        default="foldingnet",
         type=str,
         help="Please provide the type of decoder.",
     )
     parser.add_argument(
         "--learning_rate_autoencoder",
-        default=0.00001,
+        default=0.01,
         type=float,
         help="Please provide the learning rate " "for the autoencoder training.",
     )
@@ -111,13 +111,12 @@ if __name__ == "__main__":
         default=0,
         type=int,
         help="Please provide the value of proximality "
-        "[0 = distal, 1 = proximal, 2 = both].",
+             "[0 = distal, 1 = proximal, 2 = both].",
     )
     parser.add_argument(
         "--pretrained_path",
-        default="/run/user/1128299809/gvfs/smb-share:server=rds.icr.ac.uk,share=data/DBI/" \
-         "DUDBI/DYNCESYS/mvries/ResultsAlma/cellshape-generate/nets/" \
-         "dgcnn_foldingnetbasic_16_pretrained_001.pt",
+        default="/run/user/1128299809/gvfs/smb-share:server=rds.icr.ac.uk,share=data/DBI/DUDBI" \
+                "/DYNCESYS/mvries/Projects/TearingNetNew/Reconstruct_dgcnn_cls_k20_plane/models/shapenetcorev2_250.pkl",
         type=str,
         help="Please provide the path to a pretrained autoencoder.",
     )
@@ -127,14 +126,14 @@ if __name__ == "__main__":
         default=4,
         type=int,
         help="Please provide a value for beta for the beta-vae"
-        ". See https://openreview.net/forum?id=Sy2fzU9gl.",
+             ". See https://openreview.net/forum?id=Sy2fzU9gl.",
     )
     parser.add_argument(
         "--kld_weight",
         default=1,
         type=int,
         help="Please provide a value for Kullback_liebler convergence weight"
-        ". See https://openreview.net/forum?id=Sy2fzU9gl.",
+             ". See https://openreview.net/forum?id=Sy2fzU9gl.",
     )
     parser.add_argument(
         "--seed",
@@ -144,7 +143,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--criterion",
-        default="cuda",
+        default="cpu",
         type=str,
         choices=["cpu", "cuda"]
     )
