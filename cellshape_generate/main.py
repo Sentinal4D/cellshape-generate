@@ -96,7 +96,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--learning_rate_autoencoder",
-        default=0.01,
+        default=0.00001,
         type=float,
         help="Please provide the learning rate " "for the autoencoder training.",
     )
